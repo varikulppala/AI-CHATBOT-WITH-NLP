@@ -1,0 +1,157 @@
+"""
+AI CHATBOT WITH NLP (Using spaCy)
+Created as part of the CodTech internship deliverable.
+This chatbot handles basic conversation and intent recognition
+using natural language processing.
+"""
+
+import spacy
+import random
+import datetime
+
+# Load spaCy language model
+nlp = spacy.load("en_core_web_sm")
+
+# Intent-based conversation patterns
+INTENTS = {
+    "greeting": {
+        "patterns": ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"],
+        "responses": [
+            "Hello there! 😊",
+            "Hi, how can I help you?",
+            "Hey! Great to see you!",
+            "Greetings! What would you like to ask?"
+        ]
+    },
+    "goodbye": {
+        "patterns": ["bye", "goodbye", "see you", "later", "farewell", "exit"],
+        "responses": [
+            "Goodbye! Have a nice day!",
+            "See you soon!",
+            "Bye! Take care.",
+            "Farewell! 👋"
+        ]
+    },
+    "thanks": {
+        "patterns": ["thank you", "thanks", "appreciate", "grateful", "cheers"],
+        "responses": [
+            "You're welcome! 😊",
+            "No problem!",
+            "Any time!",
+            "Glad I could help!"
+        ]
+    },
+    "name": {
+        "patterns": ["what is your name", "who are you", "your name", "introduce yourself"],
+        "responses": [
+            "I'm an AI chatbot created using Python and spaCy.",
+            "You can call me ChatBot, your virtual assistant.",
+            "My name is CodBot, made for this internship!"
+        ]
+    },
+    "creator": {
+        "patterns": ["who created you", "who made you", "your creator"],
+        "responses": [
+            "I was created as part of a CodTech internship project by a Python developer!",
+            "A human with Python powers made me! 🧠",
+            "I'm the result of some cool NLP coding."
+        ]
+    },
+    "help": {
+        "patterns": ["help", "how can you help", "what can you do", "assistance"],
+        "responses": [
+            "I can answer basic questions like greetings, my name, creator info, and more.",
+            "Try saying 'hello', 'who are you', or 'bye'.",
+            "I'm here to make your day smarter!"
+        ]
+    },
+    "age": {
+        "patterns": ["how old are you", "your age", "when were you created"],
+        "responses": [
+            "I'm timeless. I live in the digital world!",
+            "I was created moments ago when you started this script!",
+            "I exist beyond the concept of age. 😉"
+        ]
+    },
+    "time": {
+        "patterns": ["what time is it", "current time", "tell me the time"],
+        "responses": []  # This will be handled dynamically
+    },
+    "date": {
+        "patterns": ["what is the date", "today's date", "current date"],
+        "responses": []  # Also handled dynamically
+    },
+    "joke": {
+        "patterns": ["tell me a joke", "make me laugh", "funny", "joke"],
+        "responses": [
+            "Why don’t scientists trust atoms? Because they make up everything!",
+            "I would tell you a joke about UDP, but you might not get it.",
+            "Why did the Python programmer go blind? Because he couldn't C!",
+            "Debugging: Being the detective in a crime movie where you are also the murderer."
+        ]
+    },
+    "default": {
+        "responses": [
+            "Hmm... I'm not sure how to respond to that.",
+            "Can you try rephrasing?",
+            "I didn't get that. Could you say it differently?",
+            "I'm still learning. Let's try another question."
+        ]
+    }
+}
+
+# Function to determine intent based on similarity
+def identify_intent(user_input):
+    doc = nlp(user_input.lower())
+
+    max_similarity = 0
+    matched_intent = "default"
+
+    for intent, intent_data in INTENTS.items():
+        for pattern in intent_data.get("patterns", []):
+            pattern_doc = nlp(pattern)
+            similarity = doc.similarity(pattern_doc)
+
+            if similarity > max_similarity and similarity > 0.75:
+                max_similarity = similarity
+                matched_intent = intent
+
+    return matched_intent
+
+# Function to generate dynamic response
+def generate_response(intent):
+    if intent == "time":
+        current_time = datetime.datetime.now().strftime("%I:%M %p")
+        return f"The current time is {current_time}."
+    elif intent == "date":
+        today = datetime.datetime.now().strftime("%B %d, %Y")
+        return f"Today's date is {today}."
+    else:
+        return random.choice(INTENTS[intent]["responses"])
+
+# Intro message
+def print_intro():
+    print("=" * 70)
+    print("🤖 Welcome to CodBot - Your AI Chatbot using spaCy NLP (Internship Project)")
+    print("Type anything to chat with me. Try: 'Hello', 'What is your name?', 'Tell me a joke'")
+    print("To exit the chat, type 'exit' or 'quit'.")
+    print("=" * 70)
+
+# Chat loop
+def chat():
+    print_intro()
+
+    while True:
+        user_input = input("\nYou: ")
+
+        if user_input.lower() in ["exit", "quit"]:
+            print("Bot: Goodbye! 👋 Thanks for chatting.")
+            break
+
+        intent = identify_intent(user_input)
+        response = generate_response(intent)
+        print(f"Bot: {response}")
+
+# Main entry
+if __name__ == "__main__":
+    chat()
